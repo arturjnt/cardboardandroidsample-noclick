@@ -17,12 +17,29 @@ using System.Collections;
 
 [RequireComponent(typeof(Collider))]
 public class Teleport : MonoBehaviour {
-  private Vector3 startingPosition;
+	private CardboardHead head;
+  	private Vector3 startingPosition;
+	private float gazeTimer;
 
-  void Start() {
-    startingPosition = transform.localPosition;
-    SetGazedAt(false);
-  }
+	void Start() {
+		head = Camera.main.GetComponent<StereoController>().Head;
+	    startingPosition = transform.localPosition;
+	    SetGazedAt(false);
+		gazeTimer = 0;
+	  }
+
+	void Update() {
+		RaycastHit hit;
+		bool isLookedAt = GetComponent<Collider>().Raycast(head.Gaze, out hit, Mathf.Infinity);
+		if (isLookedAt) {
+			gazeTimer += Time.deltaTime;
+		} else {
+			gazeTimer = 0;
+		}
+		if (gazeTimer > 1) {
+			TeleportRandomly();
+		}
+	}
 
   public void SetGazedAt(bool gazedAt) {
     GetComponent<Renderer>().material.color = gazedAt ? Color.green : Color.red;
